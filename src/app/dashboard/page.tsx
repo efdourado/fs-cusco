@@ -6,8 +6,6 @@ import Link from "next/link";
 export default async function DashboardPage() {
   const supabase = await createServer();
 
-  // Fetch subjects that have at least one question associated with them.
-  // We use an inner join (!) to filter subjects.
   const { data: subjects } = await supabase
     .from("subjects")
     .select("id, name, questions!inner(id)");
@@ -45,5 +43,4 @@ export default async function DashboardPage() {
         </div>
       )}
     </div>
-  );
-}
+); }

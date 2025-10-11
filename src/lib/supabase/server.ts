@@ -15,14 +15,14 @@ export const createServer = async () => {
         set(name: string, value: string, options: CookieOptions) {
           try {
             cookieStore.set({ name, value, ...options });
-          } catch (error) {
+          } catch (_error) { // Correção aqui
             // This can be ignored
           }
         },
         remove(name: string, options: CookieOptions) {
           try {
             cookieStore.set({ name, value: "", ...options });
-          } catch (error) {
+          } catch (_error) { // E aqui
             // This can be ignored
           }
         },
