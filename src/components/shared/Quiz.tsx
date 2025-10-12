@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition, useRef, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -22,6 +23,7 @@ type Question = {
 }
 type QuizProps = { questions: Question[] }
 
+
 export default function Quiz({ questions }: QuizProps) {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null)
@@ -29,6 +31,9 @@ export default function Quiz({ questions }: QuizProps) {
   const [lastAnswerId, setLastAnswerId] = useState<string | null>(null)
   const [isCorrect, setIsCorrect] = useState(false)
   const [isPending, startTransition] = useTransition()
+  
+  const [results, setResults] = useState<{ correct: boolean }[]>([]);
+  const router = useRouter()
 
   const [selection, setSelection] = useState<{ text: string; range: Range } | null>(null)
   const [popupPosition, setPopupPosition] = useState({ top: 0, left: 0 })
@@ -52,8 +57,7 @@ export default function Quiz({ questions }: QuizProps) {
           setPopupPosition({
             top: rect.top - cardRect.top - 40,
             left: rect.left - cardRect.left + rect.width / 2,
-        }); }
-      } else {
+      }); } } else {
         setSelection(null);
     } };
 
@@ -98,6 +102,9 @@ export default function Quiz({ questions }: QuizProps) {
     const correct = selectedOptionId === correctOption?.id
     setIsCorrect(correct)
     setIsAnswered(true)
+    
+    setResults(prev => [...prev, { correct }]);
+
     startTransition(async () => {
       const newAnswerId = await saveAnswer(currentQuestion.id, selectedOptionId, correct)
       if (newAnswerId) {
@@ -120,8 +127,11 @@ export default function Quiz({ questions }: QuizProps) {
       setIsCorrect(false)
       setSelection(null)
     } else {
-      alert("Você completou o quiz!")
-      window.location.href = '/dashboard'
+      const correctCount = results.filter(r => r.correct).length;
+      const totalCount = questions.length;
+      const subjectId = currentQuestion.subject_id;
+      
+      router.push(`/practice/results?correct=${correctCount}&total=${totalCount}&subjectId=${subjectId}`);
   } }
   
   return (

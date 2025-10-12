@@ -83,28 +83,34 @@ export async function createNotebookHighlight(
   revalidatePath('/notebook');
 }
 
-export async function createNotebookNote(
-  subjectId: string,
-  noteContent: string
-) {
+export async function createNotebookNote(formData: FormData) {
   const supabase = await createServer();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error('Usuário não autenticado.');
+    throw new Error("Usuário não autenticado.");
   }
 
-  const { error } = await supabase.from('notebook_entries').insert({
+  const subjectId = formData.get('subjectId') as string;
+  const noteContent = formData.get('noteContent') as string;
+
+  if (!subjectId || !noteContent) {
+    throw new Error("Matéria e conteúdo da anotação são obrigatórios.");
+  }
+
+  const { error } = await supabase.from("notebook_entries").insert({
     user_id: user.id,
     subject_id: subjectId,
     content: noteContent,
-    entry_type: 'user_note',
+    entry_type: "user_note",
   });
 
   if (error) {
-    console.error('Erro ao salvar anotação:', error);
-    throw new Error('Não foi possível salvar a anotação.');
+    console.error("Erro ao salvar anotação:", error);
+    throw new Error("Não foi possível salvar a anotação.");
   }
 
-  revalidatePath('/notebook');
+  revalidatePath("/notebook");
 }

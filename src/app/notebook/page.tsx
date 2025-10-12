@@ -1,9 +1,11 @@
+// src/app/notebook/page.tsx
 import { createServer } from "@/lib/supabase/server";
 import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { BookOpen, Highlighter, FileText, Bookmark, Search, Filter, Plus } from "lucide-react";
+import NewNoteForm from "@/components/notebook/NewNoteForm";
 
 type NotebookEntry = {
   id: string;
@@ -35,6 +37,8 @@ export default async function NotebookPage() {
       </div>
   ); }
 
+  const { data: subjects } = await supabase.from('subjects').select('id, name');
+
   const { data: allEntries, error } = await supabase
     .from('notebook_entries')
     .select(`
@@ -60,10 +64,12 @@ export default async function NotebookPage() {
               Organize seus grifos e anotações pessoais
             </p>
           </div>
-          <Button>
-            <Plus className="h-4 w-4 mr-2" />
-            Nova Anotação
-          </Button>
+          <NewNoteForm subjects={subjects || []}>
+            <Button>
+              <Plus className="h-4 w-4 mr-2" />
+              Nova Anotação
+            </Button>
+          </NewNoteForm>
         </div>
         <Card className="border-2 border-dashed bg-card">
           <CardContent className="flex flex-col items-center justify-center py-16 text-center">
@@ -88,7 +94,7 @@ export default async function NotebookPage() {
         </Card>
       </div>
   ); }
-  
+
   const typedEntries = allEntries as unknown as NotebookEntry[];
 
   const groupedBySubject = typedEntries.reduce((acc, entry) => {
@@ -115,12 +121,12 @@ export default async function NotebookPage() {
             {totalEntries} {totalEntries === 1 ? 'registro' : 'registros'} em {Object.keys(groupedBySubject).length} {Object.keys(groupedBySubject).length === 1 ? 'matéria' : 'matérias'}
           </p>
         </div>
-        
+
         <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
           <div className="relative flex-1 sm:w-64">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input 
-              placeholder="Buscar anotações..." 
+            <Input
+              placeholder="Buscar anotações..."
               className="pl-10"
             />
           </div>
@@ -128,10 +134,12 @@ export default async function NotebookPage() {
             <Filter className="h-4 w-4" />
             Filtrar
           </Button>
-          <Button className="gap-2">
-            <Plus className="h-4 w-4" />
-            Nova Anotação
-          </Button>
+          <NewNoteForm subjects={subjects || []}>
+            <Button className="gap-2">
+              <Plus className="h-4 w-4" />
+              Nova Anotação
+            </Button>
+          </NewNoteForm>
         </div>
       </div>
 
@@ -161,9 +169,11 @@ export default async function NotebookPage() {
           </div>
         ))}
       </div>
-      
+
       <div className="fixed bottom-6 right-6 sm:hidden">
-        <Button size="lg" className="rounded-full w-14 h-14 shadow-lg"><Plus className="h-6 w-6" /></Button>
+        <NewNoteForm subjects={subjects || []}>
+            <Button size="lg" className="rounded-full w-14 h-14 shadow-lg"><Plus className="h-6 w-6" /></Button>
+        </NewNoteForm>
       </div>
     </div>
 ); }
