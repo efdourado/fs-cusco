@@ -1,6 +1,6 @@
 # Estudos sem distrações
 
-Estudos sem distrações, Oslo é projetado para máxima eficiência. Pratique com questões, revise seus erros e organize seu conhecimento.
+Oslo é projetado para máxima eficiência. Pratique com questões, revise seus erros e organize seu conhecimento.
 
 -----
 

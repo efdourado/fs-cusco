@@ -32,9 +32,7 @@ export default function LoginPage() {
       ...(action === 'signUp' && {
         options: {
           emailRedirectTo: `${location.origin}/auth/callback`,
-        },
-      }),
-    })
+    }, }), })
 
     if (error) {
       setMessage({ type: 'error', text: error.message })
@@ -148,5 +146,4 @@ export default function LoginPage() {
         </form>
       </Card>
     </div>
-  )
-}
+) }
