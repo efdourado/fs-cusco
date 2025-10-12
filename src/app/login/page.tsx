@@ -14,19 +14,15 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [message, setMessage] = useState<{ type: 'error' | 'success', text: string } | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
+  const [loadingAction, setLoadingAction] = useState<'signIn' | 'signUp' | null>(null)
   const router = useRouter()
   const supabase = createClient()
 
   const handleAuthAction = async (action: 'signIn' | 'signUp') => {
-    setIsLoading(true)
+    setLoadingAction(action)
     setMessage(null)
 
-    const authMethod = action === 'signIn' 
-      ? supabase.auth.signInWithPassword
-      : supabase.auth.signUp;
-      
-    const { error } = await authMethod({
+    const { error } = await supabase.auth[action === 'signIn' ? 'signInWithPassword' : 'signUp']({
       email,
       password,
       ...(action === 'signUp' && {
@@ -43,13 +39,12 @@ export default function LoginPage() {
       setMessage({ type: 'success', text: 'Cadastro realizado! Verifique seu e-mail para confirmar a conta.' })
     }
     
-    setIsLoading(false)
+    setLoadingAction(null)
   }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4">
       <Card className="w-full max-w-sm relative overflow-hidden backdrop-blur-sm bg-card/80 dark:bg-card/50">
-        {/* Borda superior que você criou */}
         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-indigo-600" />
         
         <CardHeader className="text-center">
@@ -82,7 +77,7 @@ export default function LoginPage() {
                 onChange={(e) => setEmail(e.target.value)} 
                 required 
                 placeholder="seu@email.com" 
-                disabled={isLoading}
+                disabled={loadingAction !== null}
               />
             </div>
 
@@ -96,7 +91,7 @@ export default function LoginPage() {
                   onChange={(e) => setPassword(e.target.value)} 
                   required 
                   placeholder="••••••••" 
-                  disabled={isLoading}
+                  disabled={loadingAction !== null}
                   className="pr-10"
                 />
                 <button
@@ -115,9 +110,9 @@ export default function LoginPage() {
             <Button 
               type="submit" 
               className="w-full"
-              disabled={isLoading}
+              disabled={loadingAction !== null}
             >
-              {isLoading ? (
+              {loadingAction === 'signIn' ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
                 <>
@@ -128,12 +123,13 @@ export default function LoginPage() {
             </Button>
 
             <Button 
+              type="button"
               onClick={() => handleAuthAction('signUp')}
               variant="outline" 
               className="w-full"
-              disabled={isLoading}
+              disabled={loadingAction !== null}
             >
-              {isLoading ? (
+              {loadingAction === 'signUp' ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
                 <>
