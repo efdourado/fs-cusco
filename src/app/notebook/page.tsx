@@ -1,4 +1,3 @@
-// src/app/notebook/page.tsx
 import { createServer } from "@/lib/supabase/server";
 import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -23,22 +22,7 @@ type NotebookEntry = {
 export default async function NotebookPage() {
   const supabase = await createServer();
   const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user) {
-    return (
-      <div className="flex items-center justify-center py-20">
-        <Card className="w-full max-w-md text-center">
-          <CardContent className="pt-8">
-            <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h2 className="text-xl font-semibold mb-2">Acesso Restrito</h2>
-            <p className="text-muted-foreground">Você precisa estar logado para acessar seu caderno.</p>
-          </CardContent>
-        </Card>
-      </div>
-  ); }
-
   const { data: subjects } = await supabase.from('subjects').select('id, name');
-
   const { data: allEntries, error } = await supabase
     .from('notebook_entries')
     .select(`
@@ -49,7 +33,7 @@ export default async function NotebookPage() {
       subjects (name),
       questions (statement)
     `)
-    .eq('user_id', user.id)
+    .eq('user_id', user!.id)
     .order('created_at', { ascending: false });
 
   if (error || !allEntries || allEntries.length === 0) {

@@ -1,4 +1,3 @@
-// src/app/review/page.tsx
 import { createServer } from "@/lib/supabase/server";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -6,7 +5,6 @@ import ReviewFilters from "@/components/shared/ReviewFilters";
 import { cn } from "@/lib/utils";
 import { CheckCircle, XCircle } from "lucide-react";
 
-// Tipos atualizados para refletir a nova estrutura de dados
 type Option = {
   id: string;
   option_text: string;
@@ -32,23 +30,17 @@ type ReviewPageProps = {
   searchParams: Promise<{
     subject?: string;
     errorType?: string;
-  }>
-}
+}> }
 
 export default async function ReviewPage({ searchParams }: ReviewPageProps) {
   const resolvedSearchParams = await searchParams;
   const supabase = await createServer();
   const { data: { user } } = await supabase.auth.getUser();
 
-  if (!user) {
-    return <p>Você precisa estar logado para ver suas revisões.</p>;
-  }
-
   const { data: subjectsForFilter } = await supabase
     .from('subjects')
     .select('id, name');
 
-  // Query otimizada para buscar todos os dados necessários de uma vez
   let query = supabase
     .from('answers')
     .select(`
@@ -64,7 +56,7 @@ export default async function ReviewPage({ searchParams }: ReviewPageProps) {
         options (id, option_text, is_correct)
       )
     `)
-    .eq('user_id', user.id)
+    .eq('user_id', user!.id)
     .eq('is_correct', false);
 
   if (resolvedSearchParams.subject) {
@@ -76,8 +68,7 @@ export default async function ReviewPage({ searchParams }: ReviewPageProps) {
       query = query.is('error_type', null);
     } else {
       query = query.eq('error_type', resolvedSearchParams.errorType);
-    }
-  }
+  } }
 
   const { data: incorrectAnswers, error } = await query;
 
@@ -141,8 +132,7 @@ export default async function ReviewPage({ searchParams }: ReviewPageProps) {
                                           {isSelected && !isCorrect && <span className="text-xs font-semibold text-red-600 dark:text-red-400 block mt-1">Sua Resposta</span>}
                                         </div>
                                     </li>
-                                )
-                            })}
+                            ) })}
                         </ul>
                     </div>
                      {question.explanation && (
@@ -162,10 +152,8 @@ export default async function ReviewPage({ searchParams }: ReviewPageProps) {
                   )}
                 </CardFooter>
               </Card>
-            )
-          })}
+          ) })}
         </div>
       )}
     </div>
-  );
-}
+); }

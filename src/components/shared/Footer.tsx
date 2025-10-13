@@ -1,7 +1,8 @@
-import { Github, Instagram, Linkedin, Mail, LayoutList, Kanban, CornerLeftUp } from 'lucide-react';
+import { Github, Instagram, Linkedin, Mail, LayoutList, Kanban, CornerLeftUp, LogIn } from 'lucide-react';
 import Link from 'next/link';
+import { type User } from '@supabase/supabase-js';
 
-export default function Footer() {
+export default function Footer({ user }: { user: User | null }) {
   const currentYear = new Date().getFullYear();
 
   return (
@@ -12,27 +13,27 @@ export default function Footer() {
           {/* Brand Section */}
           <div className="md:col-span-2 space-y-4">
             <Link
-            href="/"
-            className="flex items-center space-x-1 group"
-          >
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-lg flex items-center justify-center transition-transform duration-200 group-hover:scale-105">
-              <span className="text-white font-bold text-sm">Os</span>
-            </div>
-            <span className="text-xl font-semibold bg-gradient-to-br from-gray-900 to-gray-600 bg-clip-text text-transparent transition-transform duration-200 group-hover:scale-105 dark:from-gray-900 dark:to-gray-600">
-              lo
-            </span>
-          </Link>
+              href={user ? "/dashboard" : "/"}
+              className="flex items-center space-x-1 group"
+            >
+              <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-lg flex items-center justify-center transition-transform duration-200 group-hover:scale-105">
+                <span className="text-white font-bold text-sm">Os</span>
+              </div>
+              <span className="text-xl font-semibold bg-gradient-to-br from-gray-900 to-gray-600 bg-clip-text text-transparent transition-transform duration-200 group-hover:scale-105 dark:from-gray-900 dark:to-gray-600">
+                lo
+              </span>
+            </Link>
             <p className="text-gray-500 max-w-md text-lg leading-relaxed">
               Simplificando seus estudos com ferramentas inteligentes para revisão e organização de materiais.
             </p>
             <div className="flex items-center gap-3 pt-2">
-              <Link 
-                href="mailto:contato@oslo.app"
+              <a 
+                href="mailto:ed320819@gmail.com"
                 className="flex items-center gap-2 text-gray-500 hover:text-gray-700 transition-colors group"
               >
                 <Mail className="h-4 w-4" />
                 <span className="text-sm">ed320819@gmail.com</span>
-              </Link>
+              </a>
             </div>
           </div>
 
@@ -40,27 +41,27 @@ export default function Footer() {
           <div className="space-y-4">
             <h3 className="font-semibold text-gray-900">Navegação</h3>
             <div className="space-y-3">
-              <Link 
-                href="/dashboard" 
-                className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors group text-sm"
-              >
-                <Kanban className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
-                Dashboard
-              </Link>
-              <Link 
-                href="/review" 
-                className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors group text-sm"
-              >
-                <CornerLeftUp className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
-                Revisão
-              </Link>
-              <Link 
-                href="/notebook" 
-                className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors group text-sm"
-              >
-                <LayoutList className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
-                Caderno
-              </Link>
+              {user ? (
+                <>
+                  <Link href="/dashboard" className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors group text-sm">
+                    <Kanban className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    Dashboard
+                  </Link>
+                  <Link href="/review" className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors group text-sm">
+                    <CornerLeftUp className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    Revisão
+                  </Link>
+                  <Link href="/notebook" className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors group text-sm">
+                    <LayoutList className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    Caderno
+                  </Link>
+                </>
+              ) : (
+                <Link href="/login" className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors group text-sm">
+                  <LogIn className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    Entrar
+                </Link>
+              )}
             </div>
           </div>
 
@@ -126,5 +127,4 @@ export default function Footer() {
         </div>
       </div>
     </footer>
-  );
-}
+); }

@@ -9,11 +9,53 @@ export async function signOut() {
   await supabase.auth.signOut()
   return redirect('/login')
 }
+export async function createQuizSession(subjectId: string): Promise<string> {
+  const supabase = await createServer();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    throw new Error('Usuário não autenticado.');
+  }
+  const { data: session, error } = await supabase
+    .from('quiz_sessions')
+    .insert({
+      user_id: user.id,
+      subject_id: subjectId,
+    })
+    .select('id')
+    .single();
+
+  if (error || !session) {
+    console.error('Erro ao criar sessão de quiz:', error);
+    throw new Error('Não foi possível iniciar o quiz.');
+  }
+  return session.id;
+}
+
+export async function updateQuizSession(sessionId: string, score: number, totalQuestions: number) {
+  const supabase = await createServer();
+  const { error } = await supabase
+    .from('quiz_sessions')
+    .update({
+      completed_at: new Date().toISOString(),
+      score,
+      total_questions: totalQuestions,
+    })
+    .eq('id', sessionId);
+
+  if (error) {
+    console.error('Erro ao finalizar sessão de quiz:', error);
+    // não lançamos um erro aqui para não quebrar a experiência do usuário se a atualização falhar
+  }
+  revalidatePath('/dashboard');
+}
+
 
 export async function saveAnswer(
   questionId: string,
   selectedOptionId: string,
-  isCorrect: boolean
+  isCorrect: boolean,
+  sessionId: string
 ): Promise<string | null> {
   const supabase = await createServer()
   const { data: { user } } = await supabase.auth.getUser()
@@ -27,6 +69,7 @@ export async function saveAnswer(
     question_id: questionId,
     selected_option_id: selectedOptionId,
     is_correct: isCorrect,
+    session_id: sessionId,
   }).select('id').single()
 
   if (error) {
@@ -52,6 +95,7 @@ export async function classifyError(answerId: string, errorType: 'attention' | '
   }
 
   revalidatePath('/dashboard')
+  revalidatePath('/review');
 }
 
 export async function createNotebookHighlight(
@@ -71,7 +115,6 @@ export async function createNotebookHighlight(
     subject_id: subjectId,
     content: highlightedText,
     entry_type: 'highlight',
-    // CORREÇÃO APLICADA AQUI:
     source_question_id: questionId, 
   });
 
@@ -79,7 +122,6 @@ export async function createNotebookHighlight(
     console.error('Erro ao salvar grifo no caderno:', error);
     throw new Error('Não foi possível salvar o grifo no caderno.');
   }
-
   revalidatePath('/notebook');
 }
 
@@ -111,6 +153,5 @@ export async function createNotebookNote(formData: FormData) {
     console.error("Erro ao salvar anotação:", error);
     throw new Error("Não foi possível salvar a anotação.");
   }
-
   revalidatePath("/notebook");
 }

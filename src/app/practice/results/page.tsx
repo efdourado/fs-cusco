@@ -19,12 +19,12 @@ export default function QuizResultsPage() {
   const subjectId = searchParams.get("subjectId");
   const total = searchParams.get("total");
   const correct = searchParams.get("correct");
+  const sessionId = searchParams.get("sessionId");
 
   if (!total || !correct) {
     router.push("/dashboard");
     return null;
   }
-
   const totalQuestions = parseInt(total, 10);
   const correctAnswers = parseInt(correct, 10);
   const incorrectAnswers = totalQuestions - correctAnswers;
@@ -36,7 +36,7 @@ export default function QuizResultsPage() {
         <CardHeader>
           <CardTitle className="text-3xl font-bold">Quiz Finalizado!</CardTitle>
           <CardDescription className="text-lg text-muted-foreground pt-2">
-            Confira seu desempenho abaixo.
+            Confira seu desempenho nesta sessão.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -59,6 +59,11 @@ export default function QuizResultsPage() {
                 {accuracy}%
               </span>
             </p>
+             {sessionId && (
+              <p className="text-xs text-muted-foreground mt-2">
+                ID da Sessão: {sessionId}
+              </p>
+            )}
           </div>
         </CardContent>
         <CardFooter className="flex flex-col sm:flex-row gap-4">

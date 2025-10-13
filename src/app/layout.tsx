@@ -45,7 +45,7 @@ export default async function RootLayout({
             <main className="flex-grow container mx-auto p-4 pt-24">
               {children}
             </main>
-            <Footer />
+            <Footer user={user} />
           </div>
         </ThemeProvider>
       </body>

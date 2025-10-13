@@ -76,7 +76,7 @@ export default function Header({ user, isAdmin }: { user: User | null, isAdmin: 
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link href={user ? "/dashboard" : "/"} className="flex items-center space-x-1 group">
+          <Link href="/" className="flex items-center space-x-1 group">
             <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-lg flex items-center justify-center transition-transform duration-200 group-hover:scale-105">
               <span className="text-white font-bold text-sm">Os</span>
             </div>

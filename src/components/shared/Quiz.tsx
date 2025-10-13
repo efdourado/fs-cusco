@@ -6,8 +6,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
-import { saveAnswer, classifyError, createNotebookHighlight } from '@/app/actions' 
-import { Highlighter } from 'lucide-react'
+import { saveAnswer, classifyError, createNotebookHighlight, createQuizSession, updateQuizSession } from '@/app/actions' 
+import { Highlighter, Loader2 } from 'lucide-react'
 
 type Option = { id: string; option_text: string; is_correct: boolean; }
 type Question = { 
@@ -23,24 +23,35 @@ type Question = {
 }
 type QuizProps = { questions: Question[] }
 
-
 export default function Quiz({ questions }: QuizProps) {
+  const [sessionId, setSessionId] = useState<string | null>(null);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null)
   const [isAnswered, setIsAnswered] = useState(false)
   const [lastAnswerId, setLastAnswerId] = useState<string | null>(null)
   const [isCorrect, setIsCorrect] = useState(false)
   const [isPending, startTransition] = useTransition()
-  
   const [results, setResults] = useState<{ correct: boolean }[]>([]);
   const router = useRouter()
-
   const [selection, setSelection] = useState<{ text: string; range: Range } | null>(null)
   const [popupPosition, setPopupPosition] = useState({ top: 0, left: 0 })
   const quizCardRef = useRef<HTMLDivElement>(null)
-
   const currentQuestion = questions[currentQuestionIndex]
   const correctOption = currentQuestion.options.find(opt => opt.is_correct)
+  
+  useEffect(() => {
+    const startSession = async () => {
+      try {
+        const newSessionId = await createQuizSession(currentQuestion.subject_id);
+        setSessionId(newSessionId);
+      } catch (error) {
+        console.error(error);
+        // um tratamento de erro para o usuário, se necessário
+      }
+    };
+    startSession();
+  }, [currentQuestion.subject_id]);
+
 
   useEffect(() => {
     const handleMouseUp = () => {
@@ -98,7 +109,7 @@ export default function Quiz({ questions }: QuizProps) {
   }
 
   const handleCheckAnswer = () => {
-    if (!selectedOptionId) return
+    if (!selectedOptionId || !sessionId) return
     const correct = selectedOptionId === correctOption?.id
     setIsCorrect(correct)
     setIsAnswered(true)
@@ -106,7 +117,7 @@ export default function Quiz({ questions }: QuizProps) {
     setResults(prev => [...prev, { correct }]);
 
     startTransition(async () => {
-      const newAnswerId = await saveAnswer(currentQuestion.id, selectedOptionId, correct)
+      const newAnswerId = await saveAnswer(currentQuestion.id, selectedOptionId, correct, sessionId)
       if (newAnswerId) {
         setLastAnswerId(newAnswerId)
   } }) }
@@ -131,8 +142,22 @@ export default function Quiz({ questions }: QuizProps) {
       const totalCount = questions.length;
       const subjectId = currentQuestion.subject_id;
       
-      router.push(`/practice/results?correct=${correctCount}&total=${totalCount}&subjectId=${subjectId}`);
-  } }
+      if (sessionId) {
+        startTransition(async () => {
+          await updateQuizSession(sessionId, correctCount, totalCount);
+          router.push(`/practice/results?correct=${correctCount}&total=${totalCount}&subjectId=${subjectId}&sessionId=${sessionId}`);
+        });
+      } else {
+        router.push(`/practice/results?correct=${correctCount}&total=${totalCount}&subjectId=${subjectId}`);
+  } } }
+
+  if (!sessionId) {
+    return (
+      <div className="flex flex-col items-center justify-center text-center py-20 gap-4">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        <p className="text-muted-foreground">Iniciando o quiz...</p>
+      </div>
+  ); }
   
   return (
     <Card className="w-full max-w-3xl mx-auto relative" ref={quizCardRef}>
@@ -209,8 +234,10 @@ export default function Quiz({ questions }: QuizProps) {
 
       <CardFooter className="pt-6">
         {isAnswered ? (
-          <Button onClick={handleNextQuestion} className="w-full">
-            {currentQuestionIndex === questions.length - 1 ? "Finalizar Quiz" : "Próxima Questão"}
+          <Button onClick={handleNextQuestion} className="w-full" disabled={isPending}>
+             {isPending ? (
+              <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Finalizando...</>
+            ) : currentQuestionIndex === questions.length - 1 ? "Finalizar Quiz" : "Próxima Questão"}
           </Button>
         ) : (
           <Button onClick={handleCheckAnswer} disabled={!selectedOptionId || isPending} className="w-full">
