@@ -11,7 +11,10 @@ const inter = Inter({ subsets: ['latin'] })
 export const metadata: Metadata = {
   title: 'Plataforma Oslo',
   description: 'Simplificando seus estudos com ferramentas inteligentes para revisão e organização de materiais.',
-}
+ 
+  icons: {
+    icon: '/memphis-logo-grey.png',
+}, }
 
 export default async function RootLayout({
   children,
@@ -42,7 +45,7 @@ export default async function RootLayout({
           <div className="flex flex-col min-h-screen">
             <Header user={user} isAdmin={isAdmin} />
 
-            <main className="flex-grow container mx-auto p-4 pt-24">
+            <main className="flex-grow container mx-auto p-4 pt-24 mb-22">
               {children}
             </main>
             <Footer user={user} />

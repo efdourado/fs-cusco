@@ -5,20 +5,20 @@ import { type User } from '@supabase/supabase-js';
 import { Button } from '@/components/ui/button';
 import { signOut } from '@/app/actions';
 import { 
-  Sheet, 
-  SheetContent, 
-  SheetHeader, 
+  Sheet,
+  SheetContent,
+  SheetHeader,
   SheetTitle,
   SheetDescription,
   SheetTrigger,
   SheetClose
 } from "@/components/ui/sheet";
 import { 
-  CornerLeftUp, 
-  LayoutList, 
-  PlusCircle, 
-  LogOut, 
-  LogIn, 
+  CornerLeftUp,
+  LayoutList,
+  PlusCircle,
+  LogOut,
+  LogIn,
   Menu,
   Settings,
   Kanban,

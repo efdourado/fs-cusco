@@ -115,9 +115,9 @@ export default async function ReviewPage({ searchParams }: ReviewPageProps) {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold mb-4">Questões para Revisão</h1>
+      <h1 className="text-3xl font-bold mb-4">Revisão (Questões)</h1>
       <p className="text-muted-foreground mb-8">
-        Aqui estão as questões que você errou, agrupadas para um estudo focado.
+        Grupo de questões marcadas para revisão com base em seus erros anteriores.
       </p>
 
       <ReviewFilters subjects={subjectsForFilter || []} />

@@ -2,6 +2,7 @@ import { createServer } from "@/lib/supabase/server";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import RecentSessions from "./RecentSessions";
+import { Target, CheckCircle, BarChart3 } from "lucide-react";
 
 async function getPerformanceStats() {
   const supabase = await createServer();
@@ -32,16 +33,42 @@ async function getPerformanceStats() {
     totalSessions: sessions.length,
 }; }
 
+function KPICard({ title, value, description, icon: Icon }: { 
+  title: string; 
+  value: string | number; 
+  description?: string;
+  icon: React.ComponentType<any>;
+}) {
+  return (
+    <Card>
+      <CardContent className="p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-medium text-muted-foreground">{title}</p>
+            <p className="text-3xl font-bold mt-2">{value}</p>
+            {description && (
+              <p className="text-xs text-muted-foreground mt-1">{description}</p>
+            )}
+          </div>
+          <div className="p-3 bg-primary/10 rounded-full">
+            <Icon className="h-6 w-6 text-primary" />
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+); }
+
 export default async function PerformanceMetrics() {
   const stats = await getPerformanceStats();
 
   if (!stats || stats.totalSessions === 0) {
     return (
-      <Card className="mt-8">
-        <CardHeader>
+      <Card className="border-dashed">
+        <CardHeader className="text-center">
           <CardTitle>Seu Desempenho</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="text-center py-8">
+          <div className="text-5xl md:text-6xl mb-4">🎯</div>
           <p className="text-muted-foreground">
             Você ainda não completou nenhum quiz. Comece a praticar para ver suas estatísticas.
           </p>
@@ -50,37 +77,42 @@ export default async function PerformanceMetrics() {
   ); }
 
   return (
-    <div className="mt-8 space-y-8">
-      <h2 className="text-2xl font-bold">Seu Desempenho</h2>
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <Card>
-          <CardHeader>
-            <CardTitle>Visão Geral</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">
-                Total de Questões Respondidas
-              </p>
-              <p className="text-2xl font-bold">{stats.totalQuestionsAnswered}</p>
+    <section>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        <KPICard
+          title="Total de Questões"
+          value={stats.totalQuestionsAnswered}
+          description="Questões respondidas"
+          icon={CheckCircle}
+        />
+        
+        <KPICard
+          title="Quizzes Realizados"
+          value={stats.totalSessions}
+          description="Sessões completadas"
+          icon={BarChart3}
+        />
+        
+        <Card className="md:col-span-2 lg:col-span-1">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <p className="text-sm font-medium text-muted-foreground">Média de Acertos</p>
+              <div className="p-3 bg-primary/10 rounded-full">
+                <Target className="h-6 w-6 text-primary" />
+              </div>
             </div>
-             <div>
-              <p className="text-sm font-medium text-muted-foreground">
-                Quizzes Realizados
+            <div className="space-y-3">
+              <p className="text-3xl font-bold">{stats.overallAccuracy}%</p>
+              <Progress value={stats.overallAccuracy} className="h-2" />
+              <p className="text-xs text-muted-foreground">
+                {stats.overallAccuracy >= 70 ? "Ótimo desempenho!" : 
+                 stats.overallAccuracy >= 50 ? "Bom trabalho, continue assim!" : "Continue praticando para melhorar!"}
               </p>
-              <p className="text-2xl font-bold">{stats.totalSessions}</p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">
-                Média de Acertos
-              </p>
-              <p className="text-2xl font-bold">{stats.overallAccuracy}%</p>
-              <Progress value={stats.overallAccuracy} className="mt-2" />
             </div>
           </CardContent>
         </Card>
-
-        <RecentSessions />
       </div>
-    </div>
+
+      <RecentSessions />
+    </section>
 ); }

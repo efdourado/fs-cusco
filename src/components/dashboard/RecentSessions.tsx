@@ -1,7 +1,7 @@
 import { createServer } from "@/lib/supabase/server";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { History } from "lucide-react";
+import { History, Calendar, Target } from "lucide-react";
 
 type Session = {
   id: string;
@@ -10,8 +10,7 @@ type Session = {
   total_questions: number;
   subjects: {
     name: string;
-  }[] | null;
-};
+} | null; };
 
 async function getRecentSessions() {
   const supabase = await createServer();
@@ -37,8 +36,27 @@ async function getRecentSessions() {
     console.error("Erro ao buscar sessões recentes:", error);
     return null;
   }
-  return sessions as Session[];
+
+  const formattedSessions = sessions?.map((s: any) => ({
+    ...s,
+    subjects: Array.isArray(s.subjects) ? s.subjects[0] : s.subjects,
+  }));
+
+  return formattedSessions as Session[];
 }
+
+function AccuracyBadge({ accuracy }: { accuracy: number }) {
+  const variant = accuracy >= 70 ? "default" : 
+                  accuracy >= 50 ? "secondary" : "destructive";
+  
+  const icon = accuracy >= 70 ? "🎯" : accuracy >= 50 ? "📊" : "💪";
+
+  return (
+    <Badge variant={variant} className="flex items-center gap-1.5 py-1 px-2">
+      <span>{icon}</span>
+      <span>{accuracy}%</span>
+    </Badge>
+); }
 
 export default async function RecentSessions() {
   const sessions = await getRecentSessions();
@@ -46,39 +64,64 @@ export default async function RecentSessions() {
   if (!sessions || sessions.length === 0) {
     return null;
   }
+
   return (
-    <Card className="col-span-1 lg:col-span-2">
+    <Card>
       <CardHeader>
         <div className="flex items-center gap-2">
-          <History className="h-5 w-5 text-muted-foreground" />
+          <History className="h-5 w-5 text-primary" />
           <CardTitle>Sessões Recentes</CardTitle>
         </div>
-        <CardDescription>Seu histórico de últimos quizzes realizados.</CardDescription>
+        <CardDescription>Seu histórico dos últimos 5 quizzes realizados</CardDescription>
       </CardHeader>
       <CardContent>
-        <ul className="space-y-4">
+        <div className="space-y-3">
           {sessions.map((session) => {
-            const accuracy = session.total_questions > 0 ? Math.round((session.score / session.total_questions) * 100) : 0;
+            const accuracy = session.total_questions > 0 ? 
+              Math.round((session.score / session.total_questions) * 100) : 0;
+            
             return (
-              <li key={session.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 p-3 rounded-lg bg-secondary/50">
-                <div className="flex-1">
-                  <p className="font-semibold">{session.subjects?.[0]?.name || 'Matéria desconhecida'}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {new Date(session.completed_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}
-                  </p>
+              <div
+                key={session.id}
+                className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+              >
+                <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 items-center">
+                  {/* Matéria */}
+                  <div className="flex items-center gap-3 col-span-1">
+                    <div className="hidden sm:block p-2 bg-primary/10 rounded-full">
+                      <Target className="h-4 w-4 text-primary" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-sm">
+                        {session.subjects?.name || 'Matéria desconhecida'}
+                      </p>
+                       <p className="sm:hidden text-xs text-muted-foreground">
+                        {new Date(session.completed_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Data */}
+                  <div className="hidden sm:flex items-center gap-2 text-sm text-muted-foreground col-span-1">
+                    <Calendar className="h-4 w-4" />
+                    {new Date(session.completed_at).toLocaleDateString('pt-BR', {
+                      day: '2-digit',
+                      month: 'long',
+                      year: 'numeric'
+                    })}
+                  </div>
+
+                  {/* Estatísticas */}
+                  <div className="flex items-center justify-end gap-4 col-span-1">
+                    <AccuracyBadge accuracy={accuracy} />
+                    <span className="text-sm font-medium min-w-[50px] text-right text-muted-foreground">
+                      {session.score}/{session.total_questions}
+                    </span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-4">
-                   <Badge variant={accuracy >= 70 ? "default" : "destructive"}>
-                    {accuracy}% de acerto
-                  </Badge>
-                  <span className="text-sm font-medium text-muted-foreground">
-                    {session.score}/{session.total_questions}
-                  </span>
-                </div>
-              </li>
-            )
-          })}
-        </ul>
+              </div>
+          ); })}
+        </div>
       </CardContent>
     </Card>
 ); }

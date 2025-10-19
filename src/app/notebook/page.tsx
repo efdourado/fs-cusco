@@ -38,16 +38,17 @@ export default async function NotebookPage() {
 
   if (error || !allEntries || allEntries.length === 0) {
     return (
-      <div className="max-w-6xl mx-auto p-4 md:p-6">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-          <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-br from-gray-900 to-gray-600 bg-clip-text text-transparent dark:from-gray-100 dark:to-gray-400">
-              Meu Caderno
-            </h1>
-            <p className="text-muted-foreground mt-2">
-              Organize seus grifos e anotações pessoais
-            </p>
-          </div>
+      <div>
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold bg-gradient-to-br from-gray-900 to-gray-600 bg-clip-text text-transparent dark:from-gray-100 dark:to-gray-400">
+            Meu Caderno
+          </h1>
+          <p className="text-muted-foreground mt-2">
+            Organize seus grifos e anotações pessoais
+          </p>
+        </div>
+
+        <div className="flex justify-end mb-8">
           <NewNoteForm subjects={subjects || []}>
             <Button>
               <Plus className="h-4 w-4 mr-2" />
@@ -55,6 +56,7 @@ export default async function NotebookPage() {
             </Button>
           </NewNoteForm>
         </div>
+
         <Card className="border-2 border-dashed bg-card">
           <CardContent className="flex flex-col items-center justify-center py-16 text-center">
             <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mb-6">
@@ -80,7 +82,6 @@ export default async function NotebookPage() {
   ); }
 
   const typedEntries = allEntries as unknown as NotebookEntry[];
-
   const groupedBySubject = typedEntries.reduce((acc, entry) => {
     const subjectName = entry.subjects?.name || 'Sem Matéria';
     if (!acc[subjectName]) {
@@ -89,42 +90,39 @@ export default async function NotebookPage() {
     acc[subjectName].push(entry);
     return acc;
   }, {} as Record<string, NotebookEntry[]>);
-
   const totalEntries = allEntries.length;
   const highlightsCount = allEntries.filter(entry => entry.entry_type === 'highlight').length;
   const notesCount = allEntries.filter(entry => entry.entry_type === 'user_note').length;
 
   return (
-    <div className="max-w-6xl mx-auto p-4 md:p-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-        <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-br from-gray-900 to-gray-600 bg-clip-text text-transparent dark:from-gray-100 dark:to-gray-400">
-            Meu Caderno
-          </h1>
-          <p className="text-muted-foreground mt-2">
-            {totalEntries} {totalEntries === 1 ? 'registro' : 'registros'} em {Object.keys(groupedBySubject).length} {Object.keys(groupedBySubject).length === 1 ? 'matéria' : 'matérias'}
-          </p>
-        </div>
+    <div>
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold bg-gradient-to-br from-gray-900 to-gray-600 bg-clip-text text-transparent dark:from-gray-100 dark:to-gray-400">
+          Meu Caderno
+        </h1>
+        <p className="text-muted-foreground mt-2">
+          {totalEntries} {totalEntries === 1 ? 'registro' : 'registros'} em {Object.keys(groupedBySubject).length} {Object.keys(groupedBySubject).length === 1 ? 'matéria' : 'matérias'}
+        </p>
+      </div>
 
-        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-          <div className="relative flex-1 sm:w-64">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Buscar anotações..."
-              className="pl-10"
-            />
-          </div>
-          <Button variant="outline" className="gap-2">
-            <Filter className="h-4 w-4" />
-            Filtrar
-          </Button>
-          <NewNoteForm subjects={subjects || []}>
-            <Button className="gap-2">
-              <Plus className="h-4 w-4" />
-              Nova Anotação
-            </Button>
-          </NewNoteForm>
+      <div className="flex flex-col sm:flex-row gap-3 w-full justify-end mb-8">
+        <div className="relative w-full sm:w-64">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Buscar anotações..."
+            className="pl-10"
+          />
         </div>
+        <Button variant="outline" className="gap-2">
+          <Filter className="h-4 w-4" />
+          Filtrar
+        </Button>
+        <NewNoteForm subjects={subjects || []}>
+          <Button className="gap-2">
+            <Plus className="h-4 w-4" />
+            Nova Anotação
+          </Button>
+        </NewNoteForm>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">

@@ -3,7 +3,6 @@
 import { useState } from "react"
 import { createQuestion } from "./actions"
 import { Plus, Trash2, BookOpen, Tag, Building, FileText, Lightbulb } from 'lucide-react'
-
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -19,11 +18,9 @@ import { Textarea } from "@/components/ui/textarea"
 export default function NewQuestionPage() {
   const [options, setOptions] = useState(["", ""])
   const [correctOption, setCorrectOption] = useState(0)
-
   const addOption = () => {
     setOptions([...options, ""])
   }
-
   const removeOption = (index: number) => {
     if (options.length > 2) {
       const newOptions = options.filter((_, i) => i !== index)
@@ -33,25 +30,23 @@ export default function NewQuestionPage() {
       } else if (correctOption > index) {
         setCorrectOption(correctOption - 1)
   } } }
-
   const handleOptionChange = (index: number, value: string) => {
     const newOptions = [...options]
     newOptions[index] = value
     setOptions(newOptions)
   }
-  
   const formAction = async (formData: FormData) => {
     await createQuestion(formData);
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-4">
+    <div>
       <div className="mb-6">
         <h1 className="text-3xl font-bold bg-gradient-to-br from-gray-900 to-gray-600 bg-clip-text text-transparent dark:from-gray-100 dark:to-gray-400">
-          Nova Questão
+          Criar uma Questão
         </h1>
         <p className="text-gray-600 dark:text-gray-400 mt-2">
-          Adicione uma nova questão ao banco de dados
+          Com mais questões, construímos um banco de estudo mais modular e eficiente.
         </p>
       </div>
 
@@ -66,7 +61,6 @@ export default function NewQuestionPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* CORREÇÃO: O 'action' do formulário agora aponta para a função wrapper 'formAction'. */}
           <form action={formAction} className="space-y-6">
             {/* Informações Básicas */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
