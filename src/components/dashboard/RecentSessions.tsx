@@ -3,6 +3,13 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { History, Calendar, Target } from "lucide-react";
 
+type SessionFromRPC = {
+  id: string;
+  completed_at: string;
+  score: number;
+  total_questions: number;
+  subjects: { name: string; } | { name: string; }[] | null;
+};
 type Session = {
   id: string;
   completed_at: string;
@@ -17,7 +24,6 @@ async function getRecentSessions() {
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) return null;
-
   const { data: sessions, error } = await supabase
     .from('quiz_sessions')
     .select(`
@@ -36,8 +42,7 @@ async function getRecentSessions() {
     console.error("Erro ao buscar sessões recentes:", error);
     return null;
   }
-
-  const formattedSessions = sessions?.map((s: any) => ({
+  const formattedSessions = sessions?.map((s: SessionFromRPC) => ({
     ...s,
     subjects: Array.isArray(s.subjects) ? s.subjects[0] : s.subjects,
   }));

@@ -2,7 +2,7 @@ import { createServer } from "@/lib/supabase/server";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import RecentSessions from "./RecentSessions";
-import { Target, CheckCircle, BarChart3 } from "lucide-react";
+import { Target, CheckCircle, BarChart3, type LucideIcon } from "lucide-react";
 
 async function getPerformanceStats() {
   const supabase = await createServer();
@@ -33,11 +33,11 @@ async function getPerformanceStats() {
     totalSessions: sessions.length,
 }; }
 
-function KPICard({ title, value, description, icon: Icon }: { 
-  title: string; 
-  value: string | number; 
+function KPICard({ title, value, description, icon: Icon }: {
+  title: string;
+  value: string | number;
   description?: string;
-  icon: React.ComponentType<any>;
+  icon: LucideIcon;
 }) {
   return (
     <Card>
