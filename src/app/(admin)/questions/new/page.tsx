@@ -39,6 +39,10 @@ export default function NewQuestionPage() {
     newOptions[index] = value
     setOptions(newOptions)
   }
+  
+  const formAction = async (formData: FormData) => {
+    await createQuestion(formData);
+  };
 
   return (
     <div className="max-w-4xl mx-auto p-4">
@@ -62,7 +66,8 @@ export default function NewQuestionPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <form action={createQuestion} className="space-y-6">
+          {/* CORREÇÃO: O 'action' do formulário agora aponta para a função wrapper 'formAction'. */}
+          <form action={formAction} className="space-y-6">
             {/* Informações Básicas */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">

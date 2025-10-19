@@ -1,77 +1,49 @@
 import { createServer } from "@/lib/supabase/server";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import RecentSessions from "./RecentSessions";
 
 async function getPerformanceStats() {
   const supabase = await createServer();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
 
-  if (!user) {
-    return null;
-  }
+  if (!user) return null;
 
-  const { data: answers, error } = await supabase
-    .from("answers")
-    .select("is_correct, questions(subjects(id, name))")
-    .eq("user_id", user.id);
+  const { data: sessions, error } = await supabase
+    .from('quiz_sessions')
+    .select('score, total_questions')
+    .eq('user_id', user.id)
+    .not('completed_at', 'is', null);
 
-  if (error || !answers) {
-    return null;
-  }
-
-  const totalAnswers = answers.length;
-  if (totalAnswers === 0) {
+  if (error || !sessions || sessions.length === 0) {
     return {
-      totalAnswers: 0,
+      totalQuestionsAnswered: 0,
       overallAccuracy: 0,
-      subjectAccuracy: [],
+      totalSessions: 0,
   }; }
-
-  const correctAnswers = answers.filter((a) => a.is_correct).length;
-  const overallAccuracy = Math.round((correctAnswers / totalAnswers) * 100);
-
-  const statsBySubject: { [key: string]: { name: string, total: number; correct: number } } = {};
-
-  for (const answer of answers) {
-    // @ts-expect-error - selects aninhados
-    const subject = answer.questions?.subjects;
-    if (subject) {
-      if (!statsBySubject[subject.id]) {
-        statsBySubject[subject.id] = { name: subject.name, total: 0, correct: 0 };
-      }
-      statsBySubject[subject.id].total++;
-      if (answer.is_correct) {
-        statsBySubject[subject.id].correct++;
-  } } }
-
-  const subjectAccuracy = Object.values(statsBySubject)
-    .map(({ name, total, correct }) => ({
-      name,
-      accuracy: Math.round((correct / total) * 100),
-    }))
-    .sort((a, b) => b.accuracy - a.accuracy);
+  
+  const totalQuestionsAnswered = sessions.reduce((sum, s) => sum + s.total_questions, 0);
+  const totalCorrectAnswers = sessions.reduce((sum, s) => sum + s.score, 0);
+  const overallAccuracy = totalQuestionsAnswered > 0 ? Math.round((totalCorrectAnswers / totalQuestionsAnswered) * 100) : 0;
 
   return {
-    totalAnswers,
+    totalQuestionsAnswered,
     overallAccuracy,
-    subjectAccuracy,
+    totalSessions: sessions.length,
 }; }
 
 export default async function PerformanceMetrics() {
   const stats = await getPerformanceStats();
 
-  if (!stats || stats.totalAnswers === 0) {
+  if (!stats || stats.totalSessions === 0) {
     return (
       <Card className="mt-8">
         <CardHeader>
-          <CardTitle>Desempenho Geral</CardTitle>
+          <CardTitle>Seu Desempenho</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground">
-            Você ainda não respondeu nenhuma questão. Comece a praticar para ver
-            suas estatísticas.
+            Você ainda não completou nenhum quiz. Comece a praticar para ver suas estatísticas.
           </p>
         </CardContent>
       </Card>
@@ -80,21 +52,27 @@ export default async function PerformanceMetrics() {
   return (
     <div className="mt-8 space-y-8">
       <h2 className="text-2xl font-bold">Seu Desempenho</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <Card>
           <CardHeader>
             <CardTitle>Visão Geral</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-6">
             <div>
               <p className="text-sm font-medium text-muted-foreground">
                 Total de Questões Respondidas
               </p>
-              <p className="text-2xl font-bold">{stats.totalAnswers}</p>
+              <p className="text-2xl font-bold">{stats.totalQuestionsAnswered}</p>
+            </div>
+             <div>
+              <p className="text-sm font-medium text-muted-foreground">
+                Quizzes Realizados
+              </p>
+              <p className="text-2xl font-bold">{stats.totalSessions}</p>
             </div>
             <div>
               <p className="text-sm font-medium text-muted-foreground">
-                Acertos
+                Média de Acertos
               </p>
               <p className="text-2xl font-bold">{stats.overallAccuracy}%</p>
               <Progress value={stats.overallAccuracy} className="mt-2" />
@@ -102,24 +80,7 @@ export default async function PerformanceMetrics() {
           </CardContent>
         </Card>
 
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle>Desempenho por Matéria</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-4">
-              {stats.subjectAccuracy.map((subject) => (
-                <li
-                  key={subject.name}
-                  className="flex items-center justify-between"
-                >
-                  <span className="font-medium">{subject.name}</span>
-                  <span className="font-semibold">{subject.accuracy}%</span>
-                </li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
+        <RecentSessions />
       </div>
     </div>
 ); }
