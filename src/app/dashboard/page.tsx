@@ -1,11 +1,12 @@
 import { createServer } from "@/lib/supabase/server";
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent, CardFooter, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import PerformanceMetrics from "@/components/dashboard/PerformanceMetrics";
 import { Badge } from "@/components/ui/badge";
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Book, Plus, Star } from "lucide-react";
 
 type SubjectStat = {
   id: string;
@@ -33,63 +34,66 @@ function SubjectCardSkeleton() {
 ); }
 
 function SubjectCard({ subject }: { subject: SubjectStat }) {
-  const accuracyColor = subject.average_accuracy >= 70 ? "text-green-600 dark:text-green-400" :
-                        subject.average_accuracy >= 50 ? "text-yellow-600 dark:text-yellow-400" : "text-red-600 dark:text-red-400";
+  const accuracyColor = subject.average_accuracy >= 80 ? "text-green-600 dark:text-green-400" :
+                        subject.average_accuracy >= 60 ? "text-yellow-600 dark:text-yellow-400" : "text-red-600 dark:text-red-400";
 
   return (
-    <Card className="flex flex-col hover:shadow-lg transition-shadow duration-300 h-full">
-      <CardHeader className="pb-3">
-        <div className="flex justify-between items-start">
-          <CardTitle className="text-lg">{subject.name}</CardTitle>
-          <Badge variant="secondary">
-            {subject.question_count} {subject.question_count === 1 ? 'questão' : 'questões'}
-          </Badge>
+    <Link href={`/practice/${subject.id}`} className="w-full">
+      <Card className="flex flex-col h-full border-2 border-blue-600 transition-transform duration-200 transform hover:scale-101 hover:shadow-lg cursor-pointer pb-0">
+      
+      <CardHeader className="px-6 pt-0">
+        <div className="flex items-center gap-3">
+          <Book className="h-6 w-6 text-muted-foreground" />
+          <div>
+            <CardTitle className="text-lg">{subject.name}</CardTitle>
+            <CardDescription>
+              Com um total de {subject.question_count} {subject.question_count === 1 ? 'questão disponível.' : 'questões disponíveis.'}
+            </CardDescription>
+          </div>
         </div>
       </CardHeader>
-      
-      <CardContent className="flex-grow space-y-4 pb-4">
-        <div className="space-y-3">
-          {subject.session_count > 0 ? (
-            <>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Quizzes realizados:</span>
-                <span className="font-semibold">{subject.session_count}</span>
+
+      <CardContent className="flex-grow px-6 pb-4">
+        {subject.session_count > 0 ? (
+          <div className=" py-2">
+            <div className="flex items-center gap-12">
+              <div>
+                <div className="text-lg font-bold">{subject.session_count} sessões</div>
+                <div className="text-xs text-muted-foreground">(iterações);</div>
               </div>
-              
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Média de acertos:</span>
-                <div className="flex items-center gap-2">
-                  <span className={`font-bold ${accuracyColor}`}>
-                    {Math.round(subject.average_accuracy)}%
-                  </span>
+
+              <div>
+                <div className={`text-lg font-bold ${accuracyColor}`}>
+                  e {' '}
+                  {Math.round(subject.average_accuracy)}% de acertos
                 </div>
+                <div className="text-xs text-muted-foreground">somando as iterações.</div>
               </div>
-            </>
-          ) : (
-            <div className="text-center py-4 flex flex-col items-center justify-center">
-              <div className="text-2xl mb-2">📚</div>
-              <p className="text-sm text-muted-foreground">
-                Você ainda não praticou esta matéria
-              </p>
             </div>
-          )}
-        </div>
+
+          </div>
+        ) : (
+          <div className="text-center py-6">
+            <div className="w-16 h-16 mx-auto mb-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
+              <Plus className="h-6 w-6 text-white" />
+            </div>
+            <p className="text-sm text-muted-foreground">Iniciar prática</p>
+          </div>
+        )}
       </CardContent>
-      
-      <CardFooter className="pt-0 mt-auto">
-        <Link href={`/practice/${subject.id}`} className="w-full">
-          <Button className="w-full">
-            {subject.session_count > 0 ? 'Continuar Praticando' : 'Começar a Praticar'}
-          </Button>
-        </Link>
+
+      <CardFooter className="p-0">
+        <Button className="w-full rounded-t-none pointer-events-none">
+          {subject.session_count > 0 ? 'Continuar Praticando' : 'Começar a Praticar'}
+        </Button>
       </CardFooter>
     </Card>
+  </Link>
 ); }
 
 function EmptySubjectsState() {
   return (
     <div className="text-center rounded-2xl border-2 border-dashed col-span-1 md:col-span-2 lg:col-span-3 border-muted-foreground/30 p-12 md:p-16">
-      <div className="text-5xl md:text-6xl mb-4">📚</div>
       <h3 className="text-xl font-semibold mb-2">Nenhuma matéria encontrada</h3>
       <p className="text-muted-foreground max-w-md mx-auto">
         Não foram encontradas matérias com questões disponíveis.
@@ -111,21 +115,15 @@ async function SubjectsList() {
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+      <div className="mb-12">
         <div>
-          <h2 className="text-2xl font-bold">Matérias Disponíveis</h2>
+          <h2 className="text-3xl font-bold">Banco de Estudo (Questões)</h2>
           {subjects && (
-            <p className="text-muted-foreground mt-1">
+            <p className="mt-2 text-muted-foreground">
               {subjects.length} {subjects.length === 1 ? 'matéria encontrada' : 'matérias encontradas'}
             </p>
           )}
         </div>
-        
-        {subjects && subjects.length > 0 && (
-          <Badge variant="outline" className="text-sm py-1 px-3">
-            {subjects.reduce((acc: number, subject: SubjectStat) => acc + subject.question_count, 0)} questões no total
-          </Badge>
-        )}
       </div>
 
       {subjects && subjects.length > 0 ? (

@@ -8,20 +8,19 @@ export default function Hero() {
       <div className="container mx-auto text-center px-4 md:px-6">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
-            Estude de forma inteligente.{" "}
+            Oslo: Estudos simplificados; sem distrações.{" "}
             <span className="bg-gradient-to-br from-blue-600 to-indigo-700 bg-clip-text text-transparent">
-              Passe mais rápido.
+              Eficiência.
             </span>
           </h1>
           <p className="mt-6 max-w-2xl mx-auto text-lg text-muted-foreground">
-            Oslo é a plataforma definitiva para quem busca a aprovação. Crie
-            questões, pratique com simulados, revise seus erros de forma
-            classificada e construa seu caderno de anotações digital.
+            Pratique com questões, revise seus erros e organize seu conhecimento.
+            Construído para ser intuitivo e responsivo, proporcionando consistência em qualquer dispositivo.
           </p>
           <div className="mt-8 flex justify-center">
             <Link href="/login">
               <Button size="lg">
-                Começar a praticar gratuitamente
+                Entrar gratuitamente
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>

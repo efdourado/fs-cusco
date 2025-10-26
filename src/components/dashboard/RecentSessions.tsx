@@ -1,7 +1,7 @@
 import { createServer } from "@/lib/supabase/server";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { History, Calendar, Target } from "lucide-react";
+import { History, Book } from "lucide-react";
 
 type SessionFromRPC = {
   id: string;
@@ -51,17 +51,16 @@ async function getRecentSessions() {
 }
 
 function AccuracyBadge({ accuracy }: { accuracy: number }) {
-  const variant = accuracy >= 70 ? "default" : 
-                  accuracy >= 50 ? "secondary" : "destructive";
-  
-  const icon = accuracy >= 70 ? "🎯" : accuracy >= 50 ? "📊" : "💪";
+  const color = accuracy >= 80 ? "bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300" : 
+                accuracy >= 60 ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300" : 
+                                 "bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300";
 
   return (
-    <Badge variant={variant} className="flex items-center gap-1.5 py-1 px-2">
-      <span>{icon}</span>
-      <span>{accuracy}%</span>
+    <Badge className={`rounded-full px-2.5 py-1 text-xs font-medium ${color}`}>
+      {accuracy}%
     </Badge>
-); }
+  );
+}
 
 export default async function RecentSessions() {
   const sessions = await getRecentSessions();
@@ -73,59 +72,53 @@ export default async function RecentSessions() {
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center gap-2">
-          <History className="h-5 w-5 text-primary" />
-          <CardTitle>Sessões Recentes</CardTitle>
+        <div className="flex items-center gap-3">
+          <History className="h-6 w-6 text-muted-foreground" />
+          <div>
+            <CardTitle>Sessões Recentes</CardTitle>
+            <CardDescription>Seu histórico com as últimas 5 sessões de questões.</CardDescription>
+          </div>
         </div>
-        <CardDescription>Seu histórico dos últimos 5 quizzes realizados</CardDescription>
       </CardHeader>
+
       <CardContent>
-        <div className="space-y-3">
-          {sessions.map((session) => {
-            const accuracy = session.total_questions > 0 ? 
-              Math.round((session.score / session.total_questions) * 100) : 0;
-            
-            return (
-              <div
-                key={session.id}
-                className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
-              >
-                <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 items-center">
-                  {/* Matéria */}
-                  <div className="flex items-center gap-3 col-span-1">
-                    <div className="hidden sm:block p-2 bg-primary/10 rounded-full">
-                      <Target className="h-4 w-4 text-primary" />
-                    </div>
-                    <div>
-                      <p className="font-semibold text-sm">
-                        {session.subjects?.name || 'Matéria desconhecida'}
-                      </p>
-                       <p className="sm:hidden text-xs text-muted-foreground">
-                        {new Date(session.completed_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
-                      </p>
-                    </div>
+        <div className="flow-root">
+          <ul className="-my-4 divide-y divide-border">
+            {sessions.map((session) => {
+              const accuracy = session.total_questions > 0 
+                ? Math.round((session.score / session.total_questions) * 100) 
+                : 0;
+              
+              return (
+                <li key={session.id} className="flex items-center space-x-4 py-4">
+       
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-medium text-foreground">
+                      {session.subjects?.name || 'Matéria desconhecida'}
+                    </p>
+                    <p className="truncate text-sm text-muted-foreground">
+                       {new Date(session.completed_at).toLocaleDateString('pt-BR', {
+                        day: 'numeric',
+                        month: 'long',
+                      })}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-4">
+                                        <AccuracyBadge accuracy={accuracy} />
+
+                     <div className="text-right">
+                        <p className="text-sm font-semibold">{session.score} de {session.total_questions}</p>
+                        <p className="text-xs text-muted-foreground">acertos potenciais</p>
+                     </div>
                   </div>
 
-                  {/* Data */}
-                  <div className="hidden sm:flex items-center gap-2 text-sm text-muted-foreground col-span-1">
-                    <Calendar className="h-4 w-4" />
-                    {new Date(session.completed_at).toLocaleDateString('pt-BR', {
-                      day: '2-digit',
-                      month: 'long',
-                      year: 'numeric'
-                    })}
+                  
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+                      <Book className="h-5 w-5 text-primary" />
                   </div>
-
-                  {/* Estatísticas */}
-                  <div className="flex items-center justify-end gap-4 col-span-1">
-                    <AccuracyBadge accuracy={accuracy} />
-                    <span className="text-sm font-medium min-w-[50px] text-right text-muted-foreground">
-                      {session.score}/{session.total_questions}
-                    </span>
-                  </div>
-                </div>
-              </div>
-          ); })}
+                </li>
+            ); })}
+          </ul>
         </div>
       </CardContent>
     </Card>
