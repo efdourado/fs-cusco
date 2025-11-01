@@ -36,11 +36,11 @@ function KPICard({ title, value, description, icon: Icon }: {
 }) {
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="px-6 pt-0">
         <div className="flex items-center gap-3">
           <Icon className="h-6 w-6 text-muted-foreground" />
           <div>
-            <CardTitle>{title}</CardTitle>
+            <CardTitle className="text-lg">{title}</CardTitle>
             <CardDescription>{description}</CardDescription>
           </div>
         </div>
@@ -50,7 +50,7 @@ function KPICard({ title, value, description, icon: Icon }: {
         <p className="text-3xl font-bold">{value}</p>
         
         <div className="w-full bg-secondary rounded-full h-2">
-          <div className="bg-primary rounded-full h-2 w-1/6"></div>
+          <div className="bg-primary rounded-full h-2 w-1/1"></div>
         </div>
       </CardContent>
 

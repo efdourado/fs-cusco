@@ -71,11 +71,11 @@ export default async function RecentSessions() {
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="px-6 pt-0">
         <div className="flex items-center gap-3">
           <History className="h-6 w-6 text-muted-foreground" />
           <div>
-            <CardTitle>Sessões Recentes</CardTitle>
+            <CardTitle className="text-lg">Sessões Recentes</CardTitle>
             <CardDescription>Seu histórico com as últimas 5 sessões de questões.</CardDescription>
           </div>
         </div>
@@ -108,7 +108,7 @@ export default async function RecentSessions() {
 
                      <div className="text-right">
                         <p className="text-sm font-semibold">{session.score} de {session.total_questions}</p>
-                        <p className="text-xs text-muted-foreground">acertos potenciais</p>
+                        <p className="text-xs text-muted-foreground">acertos potenciais.</p>
                      </div>
                   </div>
 
